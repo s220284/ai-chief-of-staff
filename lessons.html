@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Masterclass: Building Your Personal AI Chief of Staff</title>
+    <style>
+        :root {
+            --navy: #1a1f36;
+            --blue: #2563eb;
+            --blue-light: #3b82f6;
+            --blue-pale: #eff6ff;
+            --gold: #d4a843;
+            --gold-light: #fef9ec;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --green: #059669;
+            --green-light: #ecfdf5;
+            --red: #dc2626;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: var(--font);
+            color: var(--gray-800);
+            background: var(--gray-50);
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 24px;
+        }
+        .nav-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+        .nav-brand {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--navy);
+            letter-spacing: -0.3px;
+        }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a {
+            color: var(--gray-500);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .nav-links a:hover { color: var(--blue); background: var(--blue-pale); }
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--gray-600);
+        }
+        .nav-toggle svg { width: 24px; height: 24px; }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 12px 24px 20px;
+                border-bottom: 1px solid var(--gray-200);
+                box-shadow: var(--shadow-md);
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { padding: 10px 12px; font-size: 15px; }
+            .nav-toggle { display: block; }
+        }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #2d3561 100%);
+            color: white;
+            padding: 80px 24px 72px;
+            text-align: center;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(28px, 5.5vw, 48px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: clamp(16px, 2.5vw, 20px);
+            color: rgba(255,255,255,0.75);
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── Main Content ── */
+        .content {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        /* ── Progress Tracker ── */
+        .progress-tracker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: -36px 0 56px;
+            position: relative;
+            z-index: 10;
+        }
+        .progress-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .progress-item.completed {
+            border-left: 4px solid var(--green);
+        }
+        .progress-item.upcoming {
+            border-left: 4px solid var(--gray-300);
+            opacity: 0.7;
+        }
+        .progress-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .progress-item.completed .progress-icon {
+            background: var(--green-light);
+            color: var(--green);
+        }
+        .progress-item.upcoming .progress-icon {
+            background: var(--gray-100);
+            color: var(--gray-400);
+        }
+        .progress-details h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+        }
+        .progress-details span {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* ── Table of Contents ── */
+        .toc {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            padding: 28px 32px;
+            margin-bottom: 48px;
+        }
+        .toc h3 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+        }
+        .toc-list {
+            list-style: none;
+            columns: 2;
+            column-gap: 32px;
+        }
+        .toc-list li {
+            margin-bottom: 10px;
+            break-inside: avoid;
+        }
+        .toc-list a {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toc-list a:hover { color: var(--blue); }
+        .toc-list .toc-num {
+            color: var(--blue);
+            font-weight: 700;
+            font-size: 13px;
+            min-width: 24px;
+        }
+        @media (max-width: 600px) {
+            .toc-list { columns: 1; }
+        }
+
+        /* ── Session Block ── */
+        .session {
+            margin-bottom: 64px;
+        }
+        .session-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+        .session-number {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .session-header h2 {
+            font-size: clamp(22px, 4vw, 28px);
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.5px;
+        }
+        .session-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .session-meta span {
+            font-size: 14px;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ── Module Cards ── */
+        .module {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .module:hover { box-shadow: var(--shadow-md); }
+        .module-header {
+            padding: 24px 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            user-select: none;
+        }
+        .module-header:hover { background: var(--gray-50); }
+        .module-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .module-num {
+            background: var(--blue-pale);
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+        .module-title h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        .module-toggle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+        .module.open .module-toggle { transform: rotate(180deg); }
+        .module-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .module.open .module-body {
+            max-height: 3000px;
+        }
+        .module-content {
+            padding: 0 28px 28px;
+            border-top: 1px solid var(--gray-100);
+            padding-top: 24px;
+        }
+        .module-content p {
+            margin-bottom: 14px;
+            line-height: 1.7;
+        }
+        .module-content ul {
+            margin-bottom: 16px;
+            padding-left: 20px;
+        }
+        .module-content li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .module-content strong {
+            color: var(--gray-900);
+        }
+
+        /* ── Concept Cards ── */
+        .concept-card {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 14px;
+        }
+        .concept-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+        .concept-card p, .concept-card li {
+            font-size: 15px;
+        }
+
+        /* ── Quote Block ── */
+        .quote-block {
+            background: var(--gold-light);
+            border-left: 4px solid var(--gold);
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .quote-block p {
+            font-style: italic;
+            color: var(--gray-700);
+            font-size: 16px;
+            margin-bottom: 0 !important;
+        }
+
+        /* ── Homework Section ── */
+        .homework {
+            background: var(--blue-pale);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-top: 32px;
+        }
+        .homework h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--blue);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .homework ol {
+            padding-left: 20px;
+        }
+        .homework li {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .homework .sub-list {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+        .homework .sub-list li {
+            margin-bottom: 6px;
+            font-size: 15px;
+            color: var(--gray-600);
+        }
+
+        /* ── Preview Section ── */
+        .preview {
+            background: white;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-top: 24px;
+            text-align: center;
+        }
+        .preview h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+        .preview p {
+            font-size: 15px;
+            color: var(--gray-500);
+        }
+
+        /* ── Key Quotes Section ── */
+        .quotes-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .quote-item {
+            background: var(--gold-light);
+            border-left: 3px solid var(--gold);
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            font-style: italic;
+            font-size: 15px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        /* ── Print Styles ── */
+        @media print {
+            nav { display: none; }
+            .hero { padding: 40px 24px; }
+            .progress-tracker { margin-top: 20px; }
+            .module-body { max-height: none !important; }
+            .module-toggle { display: none; }
+            body { font-size: 14px; }
+            .content { max-width: 100%; }
+        }
+
+        /* ── Living Document Badge ── */
+        .living-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--green-light);
+            border: 1px solid #a7f3d0;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-top: 20px;
+        }
+        .living-badge .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <div class="nav-inner">
+        <div class="nav-brand">AI Masterclass</div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="nav-links">
+            <a href="#progress">Progress</a>
+            <a href="#session-1">Session 1</a>
+            <a href="#homework-1">Homework</a>
+            <a href="#next">Next Session</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-badge">Private Curriculum</div>
+    <h1>AI Masterclass: Building Your<br>Personal AI Chief of Staff</h1>
+    <p>A progressive curriculum from foundations to full deployment</p>
+    <div class="living-badge">
+        <span class="pulse"></span>
+        Living document — updated after each session
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="content">
+
+    <!-- Progress Tracker -->
+    <section id="progress" class="progress-tracker">
+        <div class="progress-item completed">
+            <div class="progress-icon">&#10003;</div>
+            <div class="progress-details">
+                <h4>Session 1</h4>
+                <span>Foundations &amp; Architecture</span>
+            </div>
+        </div>
+        <div class="progress-item upcoming">
+            <div class="progress-icon">2</div>
+            <div class="progress-details">
+                <h4>Session 2</h4>
+                <span>Taxonomy &amp; First Build</span>
+            </div>
+        </div>
+        <div class="progress-item upcoming">
+            <div class="progress-icon">3</div>
+            <div class="progress-details">
+                <h4>Session 3</h4>
+                <span>TBD</span>
+            </div>
+        </div>
+        <div class="progress-item upcoming">
+            <div class="progress-icon">4</div>
+            <div class="progress-details">
+                <h4>Session 4</h4>
+                <span>TBD</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Table of Contents -->
+    <div class="toc" id="toc">
+        <h3>Table of Contents</h3>
+        <ul class="toc-list">
+            <li><a href="#mod-1"><span class="toc-num">01</span> The AI Development Landscape</a></li>
+            <li><a href="#mod-2"><span class="toc-num">02</span> Token Economics &amp; Business Impact</a></li>
+            <li><a href="#mod-3"><span class="toc-num">03</span> AI Task Classification Framework</a></li>
+            <li><a href="#mod-4"><span class="toc-num">04</span> Evaluation Systems &amp; Quality Control</a></li>
+            <li><a href="#mod-5"><span class="toc-num">05</span> Building Your Intelligence Platform</a></li>
+            <li><a href="#mod-6"><span class="toc-num">06</span> Data Safety &amp; Legal Constraints</a></li>
+        </ul>
+    </div>
+
+    <!-- Session 1 -->
+    <section class="session" id="session-1">
+        <div class="session-header">
+            <div class="session-number">1</div>
+            <h2>Foundations &amp; Architecture</h2>
+        </div>
+        <div class="session-meta">
+            <span><strong>Date:</strong> May 15, 2026</span>
+            <span><strong>Duration:</strong> 1 hour</span>
+            <span><strong>Focus:</strong> Conceptual foundations, economics, platform overview</span>
+        </div>
+
+        <!-- Module 1 -->
+        <div class="module open" id="mod-1">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 1</span>
+                    <h3>The AI Development Landscape</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <div class="concept-card">
+                        <h4>LLMs vs. World Models</h4>
+                        <ul>
+                            <li><strong>Large Language Models (LLMs)</strong> calculate the next best token. They are sophisticated pattern-matching engines operating on statistical probability.</li>
+                            <li><strong>World Models</strong> allow AI to understand physical space with self-awareness. This is the frontier that separates current AI from true general intelligence.</li>
+                            <li><strong>Jan LeCun</strong> raised $1B for AMI (Advanced Machine Intelligence) based on world model theory. The math to solve this does not exist yet.</li>
+                            <li>This requires a "new calculus" level breakthrough. Historical parallel: Newton invented calculus to solve planetary motion, then turned 26.</li>
+                        </ul>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>The Bitter Lesson (Rich Sutton, 2019)</h4>
+                        <p>Throwing enough compute and storage at problems beats human expertise every time. LLMs beat Google's English-major-designed translation systems. The implication: advanced reasoning engines might solve the world model problem before mathematicians do.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Current State of the Field</h4>
+                        <p>Anthropic's team works 10x faster with advanced Claude models that are not publicly available. We are in a period where <strong>cultural debt, not technical debt</strong>, is the main challenge. Organizations are limited by their willingness to adopt, not by the technology itself.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="module" id="mod-2">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 2</span>
+                    <h3>Token Economics &amp; Business Impact</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <ul>
+                        <li><strong>Individual scale:</strong> $100-500/day in token costs is invisible to a single power user. At personal scale, the distinction between tasks, workflows, and agents is academic.</li>
+                        <li><strong>Enterprise math:</strong> 30,000 workers x $20/day = $15M/year. This is a material line item that demands CFO attention.</li>
+                        <li><strong>"Year of the Token P&amp;L"</strong> — CFOs will start tracking AI costs as a dedicated line item, similar to how cloud compute became its own budget category.</li>
+                        <li><strong>Jevons Paradox applies:</strong> Cheaper inference does not reduce spending. It creates an insatiable appetite for more use cases. Every efficiency gain gets reinvested into new applications.</li>
+                        <li>The economic difference between tasks, workflows, and agents matters at enterprise scale (cost predictability, budget planning) rather than personal scale.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="module" id="mod-3">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 3</span>
+                    <h3>AI Task Classification Framework</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <p>Three strict definitions from the Anthropic model. Be your own "buzzword police."</p>
+
+                    <div class="concept-card">
+                        <h4>Task (Single Tool Call)</h4>
+                        <ul>
+                            <li>Extract, summarize, find, search — one primitive, one action</li>
+                            <li>Deterministic: you are in charge, you understand the output</li>
+                            <li>Relatively cheap, but can be a trap if poorly scoped</li>
+                            <li><strong>Example:</strong> "Search the CE database for X"</li>
+                        </ul>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Workflow (Multi-Tool Call, Mapped Sequence)</h4>
+                        <ul>
+                            <li>A to B to C to D with decision trees you personally mapped</li>
+                            <li>You understand the flow — like a waterfall project schedule</li>
+                            <li>Can incorporate machine learning graders (40 cents vs $40 for GPUs)</li>
+                            <li>Can mix AI decisions with old-school ML, data science, heuristics</li>
+                            <li><strong>Example:</strong> Analyze 15,000 blog posts for 75-100 writing features using ML graders, then feed results to LLM</li>
+                        </ul>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Agent (Multi-Tool Call, Full Agency)</h4>
+                        <ul>
+                            <li>"Bring me the broomstick of the Wicked Witch of the West — I don't care how"</li>
+                            <li>Unpredictable token burn — may write 3,000 lines of Python when a simple tool call existed</li>
+                            <li>Cannot find a tool? It will build one. You will not know it spent $8 doing so.</li>
+                            <li>Requires monitoring dashboards and evaluation systems</li>
+                            <li><strong>Example:</strong> GSD (Get Shit Done) framework — ask questions, then go make things happen</li>
+                        </ul>
+                    </div>
+
+                    <div class="quote-block">
+                        <p>"I want to be chief of staff to Carolyn Everson. Well, that means reading emails every morning. That's not an agent. That's a workflow."</p>
+                    </div>
+                    <div class="quote-block">
+                        <p>"An agent would be: bring me the broomstick. I don't care how you do it."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="module" id="mod-4">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 4</span>
+                    <h3>Evaluation Systems &amp; Quality Control</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <div class="concept-card">
+                        <h4>Most Primitive Eval: The Like Button</h4>
+                        <p>Like Facebook's thumbs up/down. Better than nothing — it is signal. Any feedback mechanism is better than flying blind.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Better Eval: The Spreadsheet Format</h4>
+                        <ul>
+                            <li><strong>Column 1:</strong> What was asked</li>
+                            <li><strong>Column 2:</strong> Results delivered</li>
+                            <li><strong>Column 3:</strong> Letter grade (from you, the subject matter expert)</li>
+                            <li><strong>Column 4:</strong> What could be done differently/better</li>
+                        </ul>
+                        <p>This gets re-ingested into the system. This is how it improves.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Canon Safe / Brand Room (Peppa Pig Example)</h4>
+                        <ul>
+                            <li>Full character knowledge base: voice profile, relationships, legal issues, safety constraints</li>
+                            <li>Multiple critics: canon fidelity, legal compliance, relationship accuracy, brand protection</li>
+                            <li>Test suites, certifications, security red-teaming, A/B testing, model drift monitoring</li>
+                            <li><strong>Positive exemplars required</strong> — hundreds per character. Newer models (4.7) respond to positive reinforcement; older models (4.6) used negative reinforcement</li>
+                            <li>The "pink elephant problem": telling a model "no em dashes" makes it think about em dashes</li>
+                        </ul>
+                    </div>
+
+                    <div class="quote-block">
+                        <p>"What gets measured gets managed."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5 -->
+        <div class="module" id="mod-5">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 5</span>
+                    <h3>Building Your Intelligence Platform</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <div class="concept-card">
+                        <h4>Single Source of Truth (SST)</h4>
+                        <p>Start with a Google Sheet. Shelly's started as a Sheet and remains a Sheet. This is your master reference — the system needs to know who people are, what relationships exist, and what matters to you.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Daily Brief System</h4>
+                        <p>4x daily updates (2am, 6am, 2pm, 6pm) covering: TL;DR, urgent needs, schedule, client intelligence, market intelligence, follow-up actions, key priorities. The system reads your calendar, emails, and knowledge base to produce a personalized intelligence briefing.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Email Draft System</h4>
+                        <p>AI drafts responses based on context and relationship history. Human reviews and approves. Nothing sends automatically. The human remains the decision-maker; the AI handles the cognitive labor of drafting.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Customer Data Platform (CDP)</h4>
+                        <p>52,000 people tracked, 28,000 flagged as important. Geo-mapped by airport code for meeting coordination. Engagement scoring, lifecycle tracking, signal detection for job changes and relationship shifts.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Agent Monitoring</h4>
+                        <p>Dashboard prevents runaway costs ($300-1,500/day personal burn is normal). Notifications fire for anomalies. You must be able to see what your agents are spending and why.</p>
+                    </div>
+
+                    <div class="concept-card">
+                        <h4>Research Agent</h4>
+                        <p>Analyzes readership behavior + news landscape to choose top 10 stories daily, then drafts content using the top-ranked story. Combines audience intelligence with editorial judgment.</p>
+                    </div>
+
+                    <div class="quote-block">
+                        <p>"We don't need 10 years of shit — we need 20 good examples of everything."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 6 -->
+        <div class="module" id="mod-6">
+            <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="module-title">
+                    <span class="module-num">MODULE 6</span>
+                    <h3>Data Safety &amp; Legal Constraints</h3>
+                </div>
+                <div class="module-toggle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="module-body">
+                <div class="module-content">
+                    <ul>
+                        <li><strong>Liability shift:</strong> 72 MSAs with Fortune 500 companies changed terms. Liability went from 2x-5x to unlimited for data breaches.</li>
+                        <li><strong>Insurance unavailable:</strong> CNA (45-year relationship) could not write the policy. The risk profile is uninsurable.</li>
+                        <li><strong>Palmer Group's solution:</strong> Stopped coding for clients early 2025. Advisory only — no data access, no Slack channels, email only.</li>
+                        <li><strong>For the student:</strong> Must parse value based on contractual obligations. NDAs, board confidentiality agreements, and fiduciary duties all constrain what data can enter any AI system.</li>
+                        <li><strong>Compartmentalization is key:</strong> Personal life data vs. business/board data must be strictly separated. Different systems, different access controls, different risk profiles.</li>
+                    </ul>
+
+                    <div class="quote-block">
+                        <p>"Cultural debt, not technical debt, is the main challenge."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Quotes -->
+        <div style="margin-top: 40px;">
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--gray-900); margin-bottom: 16px;">Key Quotes from Session 1</h3>
+            <div class="quotes-grid">
+                <div class="quote-item">"Cultural debt, not technical debt, is the main challenge."</div>
+                <div class="quote-item">"What gets measured gets managed."</div>
+                <div class="quote-item">"We don't need 10 years of shit — we need 20 good examples of everything."</div>
+                <div class="quote-item">"I want to be chief of staff to Carolyn Everson. Well, that means reading emails every morning. That's not an agent. That's a workflow."</div>
+                <div class="quote-item">"An agent would be: bring me the broomstick. I don't care how you do it."</div>
+            </div>
+        </div>
+
+        <!-- Homework -->
+        <div class="homework" id="homework-1">
+            <h3>&#128218; Homework Assignment (Due: Session 2)</h3>
+            <ol>
+                <li>
+                    Create an "SST" folder in Google Drive with subfolders:
+                    <ul class="sub-list">
+                        <li><code>/Meetings</code> — meeting transcripts (use Granola, convert to Google Docs)</li>
+                        <li><code>/Reports</code> — writing samples, reports, research</li>
+                        <li><code>/Research</code> — industry materials, things you are studying</li>
+                    </ul>
+                </li>
+                <li>Collect 15-30 best writing examples (emails, reports, speeches)</li>
+                <li>Screenshots from "Carolyn's Top 3" (Facebook-era weekly video/write-up) go in the SST folder as well</li>
+                <li>Start using Granola for all meetings — paste the full transcript (not summarized notes) into a Google Doc</li>
+                <li>Do not worry about format — "the LLM doesn't care if it's a mess"</li>
+            </ol>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview" id="next">
+            <h3>Preview: Session 2</h3>
+            <p>Build the CE taxonomy and database using Claude. Hands-on: Claude Code will code the database structure. Ingest first data into the knowledge base. Proper taxonomy so the system understands what it is ingesting.</p>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // Open first module by default, rest collapsed
+    // (Already handled via 'open' class in HTML)
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Close mobile nav
+            document.querySelector('.nav-links').classList.remove('open');
+        });
+    });
+</script>
+
+</body>
+</html>
